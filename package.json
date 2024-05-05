@@ -4,7 +4,8 @@
   "description": "API do projeto Sangue Mais",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node-dev src/server.ts"
+    "dev": "nodemon --exec ts-node-dev src/server.ts",
+    "build": "tsc"
   },
   "author": "Gabriel Neimester Rodrigues",
   "license": "ISC",
