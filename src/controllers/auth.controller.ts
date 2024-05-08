@@ -190,4 +190,5 @@ export default class AuthController {
         // Retorna uma resposta vazia
         return res.status(204).json()
     }
+
 }
