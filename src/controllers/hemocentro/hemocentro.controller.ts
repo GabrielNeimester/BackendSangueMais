@@ -72,7 +72,7 @@ export default class HemocentroController {
 
     static async update(req: Request, res: Response) {
         const { id } = req.params
-        const { cnpj, nome, estado, cidade, bairro, telefone, email } = req.body
+        const { cnpj, nome, estado, cidade, bairro, telefone, email, ativo } = req.body
 
         const { userId } = req.headers
 
@@ -110,6 +110,7 @@ export default class HemocentroController {
                 hemocentro.telefone = telefone
                 hemocentro.bairro = bairro
                 hemocentro.email = email
+                hemocentro.ativo = ativo
                 await hemocentro.save()
 
                 return res.status(201).json({ hemocentro })
@@ -125,50 +126,5 @@ export default class HemocentroController {
         }
     }
 
-    static async changeStatus(req: Request, res: Response) {
-        const { id } = req.params
-    
-
-        const { userId } = req.headers
-
-
-        if (!userId) return res.status(401).json({ error: 'Usuário não autenticado' })
-
-
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: 'O id é obrigatório' })
-        }
-
-        try {
-
-            const user = await User.findOne({ _id: userId })
-
-            if (!user) {
-                return res.status(404).json({ error: 'Usuário não encontrado' })
-            }
-
-            if (user.nivelAcesso === 'Adm') {
-
-                const hemocentro = await Hemocentro.findOne({_id: id})
-
-                if (!hemocentro) {
-                    return res.status(404).json({ error: 'Hemocentro não encontrado' })
-                  }
-
-                hemocentro.ativo = !hemocentro.ativo
-                await hemocentro.save()
-
-                return res.status(201).json(hemocentro.ativo)
-
-            }
-            else {
-                return res.status(401).json({ error: 'Acesso não autorizado' })
-            }
-
-
-        } catch (error) {
-            return res.status(500).json({ error: 'Erro interno do servidor' })
-        }
-    }
 }
 
