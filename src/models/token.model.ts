@@ -10,6 +10,7 @@ export interface TokenDocument extends Document {
 const TokenSchema: Schema = new Schema({
   _id: {
     type: mongoose.Types.ObjectId,
+    auto: true
 },
   token: {
     type: String,

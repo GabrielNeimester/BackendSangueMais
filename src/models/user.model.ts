@@ -11,6 +11,7 @@ export interface UserDocument extends Document {
 const UserSchema: Schema = new Schema({
   _id: {
     type: mongoose.Types.ObjectId,
+    auto: true
 },
   nome: {
     type: String,
