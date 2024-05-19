@@ -138,11 +138,7 @@ export default class AuthController {
         // Gera um refresh token aleatório
         token.refreshToken = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
 
-        if (!user || !user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
-            return res.status(400).json({ error: 'Invalid ID' });
-          }
-          
-        token.userId = user._id
+        token.userId =  mongoose.Types.ObjectId.createFromHexString(user._id.toString())
         await token.save()
 
         return res.json({
