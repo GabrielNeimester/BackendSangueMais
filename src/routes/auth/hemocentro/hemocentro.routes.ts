@@ -6,10 +6,10 @@ const bloodcenterRoutes = Router()
 
 
 bloodcenterRoutes.get('/', HemocentroController.index)
-bloodcenterRoutes.get('/:id', HemocentroController.show)
+bloodcenterRoutes.get('/hemocentroShow/:id', HemocentroController.show)
 bloodcenterRoutes.post('/', authMiddleware, HemocentroController.store)
 bloodcenterRoutes.put('/:id', authMiddleware,HemocentroController.update)
-bloodcenterRoutes.get('/showByUser', authMiddleware, HemocentroController.showByUser)
+bloodcenterRoutes.get('/userShow', authMiddleware, HemocentroController.userShow)
 
 
 export default bloodcenterRoutes
