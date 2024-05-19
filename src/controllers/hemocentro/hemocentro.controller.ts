@@ -69,6 +69,21 @@ export default class HemocentroController {
         return res.json(hemocentro)
     }
 
+    static async showByUser(req: Request, res: Response) {
+       const { userId } = req.headers
+
+       if (!userId) return res.status(401).json({ error: 'Usuário não autenticado' })
+
+        const user = await User.findById(userId)
+
+            if (!user) {
+                return res.status(404).json({ error: 'Usuário não encontrado' })
+            }
+        
+        const hemocentro = await Hemocentro.findById(user.hemocentroId).exec()
+        return res.json(hemocentro)
+    }
+
 
     static async update(req: Request, res: Response) {
         const { id } = req.params
