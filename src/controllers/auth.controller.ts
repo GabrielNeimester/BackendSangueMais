@@ -137,11 +137,7 @@ export default class AuthController {
         token.expiracao = new Date(Date.now() + 60 * 60 * 1000)
         // Gera um refresh token aleatório
         token.refreshToken = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
-
-        if (!user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
-            return res.status(400).json({ error: 'id inválido' })
-        }
-
+        
         token.userId = user._id
         await token.save()
 
