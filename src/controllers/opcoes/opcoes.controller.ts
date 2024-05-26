@@ -7,7 +7,7 @@ import Opcoes from '../../models/opcoes.model'
 
 export default class QuestoesController {
     static async store(req: Request, res: Response) {
-        const { descricao, questaoId } = req.body
+        const { descricao, questaoId, impedimento, diasImpedidos } = req.body
         const { userId } = req.headers
 
 
@@ -46,6 +46,8 @@ export default class QuestoesController {
                 const opcao = new Opcoes()
                 opcao.descricao = descricao
                 opcao.questaoId = questaoId
+                opcao.impedimento = impedimento
+                opcao.diasImpedidos = diasImpedidos
                 await opcao.save()
                 return res.status(201).json({ opcao })
             }
@@ -69,7 +71,7 @@ export default class QuestoesController {
 
     static async update(req: Request, res: Response) {
         const { id } = req.params
-        const { descricao } = req.body
+        const { descricao, impedimento, diasImpedidos } = req.body
         const { userId } = req.headers
 
 
@@ -113,6 +115,8 @@ export default class QuestoesController {
 
             if (questao.hemocentroId.toString() === user.hemocentroId.toString()) {
                 opcao.descricao = descricao
+                opcao.impedimento = impedimento
+                opcao.diasImpedidos = diasImpedidos
                 await opcao.save()
                 return res.status(201).json({ opcao })
             }
