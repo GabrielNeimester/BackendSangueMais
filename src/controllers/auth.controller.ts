@@ -116,7 +116,12 @@ export default class AuthController {
             if(hemocentro.ativo === false){
                 return res.status(400).json({ error: 'Hemocentro está inativo' })
             }
-            const passwordMatch = bcrypt.compareSync(senha, user.senha)
+        }
+
+        
+        
+
+        const passwordMatch = bcrypt.compareSync(senha, user.senha)
         if (!passwordMatch) return res.status(401).json({ error: 'Senha inválida' })
 
 
@@ -141,47 +146,6 @@ export default class AuthController {
             expiresAt: token.expiracao,
             refreshToken: token.refreshToken
         })
-        }
-        else return res.status(401).json({ error: 'Acesso não autorizado' })
-    }
-
-    static async loginAdm(req: Request, res: Response) {
-        const { nome, senha } = req.body
-
-        if (!nome) return res.status(400).json({ error: 'O nome é obrigatório' })
-        if (!senha) return res.status(400).json({ error: 'A senha é obrigatória' })
-
-        const user = await User.findOne({nome: nome })
-        if (!user) return res.status(401).json({ error: 'Usuário não encontrado' })
-
-        if (user.nivelAcesso === 'Adm'){
-            const passwordMatch = bcrypt.compareSync(senha, user.senha)
-        if (!passwordMatch) return res.status(401).json({ error: 'Senha inválida' })
-
-
-        // Remove todos os tokens antigos do usuário
-        await Token.deleteMany(
-            {userId: user._id}
-        )
-
-        const token = new Token()
-        // Gera um token aleatório
-        token.token = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
-        // Define a data de expiração do token para 1 hora
-        token.expiracao = new Date(Date.now() + 60 * 60 * 1000)
-        // Gera um refresh token aleatório
-        token.refreshToken = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
-
-        token.userId =  mongoose.Types.ObjectId.createFromHexString(user._id.toString())
-        await token.save()
-
-        return res.json({
-            token: token.token,
-            expiresAt: token.expiracao,
-            refreshToken: token.refreshToken
-        })
-        }
-        else return res.status(401).json({ error: 'Acesso não autorizado' })
     }
 
     static async refresh(req: Request, res: Response) {
