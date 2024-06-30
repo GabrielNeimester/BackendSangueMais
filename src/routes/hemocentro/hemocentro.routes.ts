@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import authMiddleware from '../../../middlewares/auth.middlewares'
-import HemocentroController from '../../../controllers/hemocentro/hemocentro.controller'
+import authMiddleware from '../../middlewares/auth.middlewares'
+import HemocentroController from '../../controllers/hemocentro/hemocentro.controller'
 
 const bloodcenterRoutes = Router()
 

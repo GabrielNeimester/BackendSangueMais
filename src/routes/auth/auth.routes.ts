@@ -7,6 +7,7 @@ const authRoutes = Router()
 
 authRoutes.post('/register', authMiddleware, AuthController.store)
 authRoutes.post('/login', AuthController.login)
+authRoutes.post('/login/adm', AuthController.loginAdm)
 authRoutes.post('/refresh', AuthController.refresh)
 authRoutes.post('/logout', AuthController.logout)
 

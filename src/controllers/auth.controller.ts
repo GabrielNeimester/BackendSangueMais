@@ -16,14 +16,11 @@ export default class AuthController {
 
         try {
 
-            const user = await User.findOne({ _id: userId })
+            const userAutenticado = await User.findOne({ _id: userId })
 
-            if (!user) {
+            if (!userAutenticado) {
                 return res.status(404).json({ error: 'Usuário não encontrado' });
             }
-
-            // Access the user's role
-            if (user.nivelAcesso === 'Adm') {
 
                 if (!nome) return res.status(400).json({ error: 'O nome é obrigatório' })
                 if (!senha) return res.status(400).json({ error: 'A senha é obrigatória' })
@@ -32,6 +29,9 @@ export default class AuthController {
                 const user = await User.findOne({ nome: nome })
 
                 if (user) return res.status(400).json({ error: 'Nome de usuário já existe' })
+
+
+                    
 
                 if (nivelAcesso === 'Hemocentro') {
                     if (!hemocentroId || !mongoose.Types.ObjectId.isValid(hemocentroId)) {
@@ -48,50 +48,46 @@ export default class AuthController {
                         return res.status(400).json({ error: 'Hemocentro está inativo' })
                     }
 
-                    const user = new User()
-                    user.nome = nome
-                    user.senha = bcrypt.hashSync(senha, 10)
-                    user.nivelAcesso = nivelAcesso
-                    user.hemocentroId = hemocentroId
-                    await user.save()
+                    const novoUser = new User()
+                    novoUser.nome = nome
+                    novoUser.senha = bcrypt.hashSync(senha, 10)
+                    novoUser.nivelAcesso = nivelAcesso
+                    novoUser.hemocentroId = hemocentroId
+                    await novoUser.save()
 
                     return res.status(201).json({
-                        id: user.id,
-                        nome: user.nome,
-                        nivelAcesso: user.nivelAcesso,
-                        hemocentroId: user.hemocentroId
+                        id: novoUser.id,
+                        nome: novoUser.nome,
+                        nivelAcesso: novoUser.nivelAcesso,
+                        hemocentroId: novoUser.hemocentroId
                     })
 
 
                 }
 
                 else if (nivelAcesso === 'Adm') {
-                    const user = new User()
-                    user.nome = nome
+                    const novoUser = new User()
+                    novoUser.nome = nome
                     // Gera a hash da senha com bcrypt - para não salvar a senha em texto puro
-                    user.senha = bcrypt.hashSync(senha, 100)
-                    user.nivelAcesso = nivelAcesso
-                    await user.save()
+                    novoUser.senha = bcrypt.hashSync(senha, 10)
+                    novoUser.nivelAcesso = nivelAcesso
+                    await novoUser.save()
 
                     return res.status(201).json({
-                        id: user.id,
-                        nome: user.nome,
-                        nivelAcesso: user.nivelAcesso,
+                        id: novoUser.id,
+                        nome: novoUser.nome,
+                        nivelAcesso: novoUser.nivelAcesso,
                     })
 
 
                 }
                 else return res.status(400).json({ erro: 'Nível de acesso é inválido' })
 
-            }
-            else {
-                return res.status(401).json({ error: 'Acesso não autorizado' });
-            }
 
 
         } catch (error) {
 
-            return res.status(500).json({ error: 'Erro interno do servidor' });
+            return res.status(500).json({error: "Erro interno do Servidor"});
         }
 
 
@@ -116,12 +112,7 @@ export default class AuthController {
             if(hemocentro.ativo === false){
                 return res.status(400).json({ error: 'Hemocentro está inativo' })
             }
-        }
-
-        
-        
-
-        const passwordMatch = bcrypt.compareSync(senha, user.senha)
+            const passwordMatch = bcrypt.compareSync(senha, user.senha)
         if (!passwordMatch) return res.status(401).json({ error: 'Senha inválida' })
 
 
@@ -146,6 +137,47 @@ export default class AuthController {
             expiresAt: token.expiracao,
             refreshToken: token.refreshToken
         })
+        }
+        else return res.status(401).json({ error: 'Acesso não autorizado' })
+    }
+
+    static async loginAdm(req: Request, res: Response) {
+        const { nome, senha } = req.body
+
+        if (!nome) return res.status(400).json({ error: 'O nome é obrigatório' })
+        if (!senha) return res.status(400).json({ error: 'A senha é obrigatória' })
+
+        const user = await User.findOne({nome: nome })
+        if (!user) return res.status(401).json({ error: 'Usuário não encontrado' })
+
+        if (user.nivelAcesso === 'Adm'){
+            const passwordMatch = bcrypt.compareSync(senha, user.senha)
+        if (!passwordMatch) return res.status(401).json({ error: 'Senha inválida' })
+
+
+        // Remove todos os tokens antigos do usuário
+        await Token.deleteMany(
+            {userId: user._id}
+        )
+
+        const token = new Token()
+        // Gera um token aleatório
+        token.token = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
+        // Define a data de expiração do token para 1 hora
+        token.expiracao = new Date(Date.now() + 60 * 60 * 1000)
+        // Gera um refresh token aleatório
+        token.refreshToken = bcrypt.hashSync(Math.random().toString(36), 1).slice(-20)
+
+        token.userId =  mongoose.Types.ObjectId.createFromHexString(user._id.toString())
+        await token.save()
+
+        return res.json({
+            token: token.token,
+            expiresAt: token.expiracao,
+            refreshToken: token.refreshToken
+        })
+        }
+        else return res.status(401).json({ error: 'Acesso não autorizado' })
     }
 
     static async refresh(req: Request, res: Response) {

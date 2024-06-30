@@ -20,10 +20,11 @@ const OpcoesSchema: Schema = new Schema({
   impedimento:{
     type: String,
     required: true,
-    maxLength: 100
+    enum: ['temporario', 'definitivo', 'nenhum'],
   },
   diasImpedidos:{
-    type: Number
+    type: Number,
+    required: true
   },
   questaoId: {
     type: mongoose.Types.ObjectId,

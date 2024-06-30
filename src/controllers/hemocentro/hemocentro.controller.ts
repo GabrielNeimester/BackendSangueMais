@@ -112,13 +112,13 @@ export default class HemocentroController {
                 return res.status(404).json({ error: 'Usuário não encontrado' })
             }
 
+            const hemocentro = await Hemocentro.findOne({_id: id})
+
+            if (!hemocentro) {
+                return res.status(404).json({ error: 'Hemocentro não encontrado' })
+              }
+
             if (user.nivelAcesso === 'Adm') {
-
-                const hemocentro = await Hemocentro.findOne({_id: id})
-
-                if (!hemocentro) {
-                    return res.status(404).json({ error: 'Hemocentro não encontrado' })
-                  }
 
                 hemocentro.cnpj = cnpj
                 hemocentro.nome = nome
@@ -131,6 +131,28 @@ export default class HemocentroController {
                 await hemocentro.save()
 
                 return res.status(201).json({ hemocentro })
+
+            }
+            else if(user.nivelAcesso === "Hemocentro"){
+
+                const userHemocentro = await Hemocentro.findOne({_id: user.hemocentroId})
+
+                if(user.hemocentroId.equals(hemocentro._id)){
+
+                    hemocentro.cnpj = cnpj
+                    hemocentro.nome = nome
+                    hemocentro.estado = estado
+                    hemocentro.cidade = cidade
+                    hemocentro.telefone = telefone
+                    hemocentro.bairro = bairro
+                    hemocentro.email = email
+                    await hemocentro.save()
+    
+                    return res.status(201).json({ hemocentro })
+                }
+                else{
+                    return res.status(404).json({ error: 'Hemocentro não associado a usuário' })
+                }
 
             }
             else {

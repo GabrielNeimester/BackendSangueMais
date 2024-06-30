@@ -3,6 +3,7 @@ import User from '../../models/user.model'
 import mongoose from 'mongoose'
 import Questoes from '../../models/questoes.model'
 import Hemocentro from '../../models/hemocentro.model'
+import Opcoes from '../../models/opcoes.model'
 
 export default class QuestoesController {
     static async store(req: Request, res: Response) {
@@ -139,9 +140,10 @@ export default class QuestoesController {
         }
 
 
-        if (user.hemocentroId === questao.hemocentroId) {
-            await questao.deleteOne({ _id: id })
-            return res.status(204).json() // Vamos retornar 204 pois não temos conteúdo para retornar
+        if (user.hemocentroId.equals(questao.hemocentroId)) {
+            await Opcoes.deleteMany({ questaoId: id })
+            await questao.deleteOne()
+            return res.status(204).json()
         }
         else {
             return res.status(404).json({ error: 'Acesso não autorizado' })
