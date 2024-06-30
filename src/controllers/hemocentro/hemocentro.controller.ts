@@ -139,7 +139,7 @@ export default class HemocentroController {
                 const userHemocentro = await Hemocentro.findOne({ _id: user.hemocentroId })
 
 
-                    if (new ObjectId(user.hemocentroId).equals(hemocentro._id)) {
+                    if (String(user.hemocentroId) === String(hemocentro._id)) {
 
                         hemocentro.cnpj = cnpj
                         hemocentro.nome = nome
