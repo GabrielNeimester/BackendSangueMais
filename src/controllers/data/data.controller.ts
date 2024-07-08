@@ -44,7 +44,9 @@ export default class DataController {
                 return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' })
             }
 
-            const dataFinal = new Date(dataConvertida + 'T00:00:00Z')
+            const dataFinal = new Date(ano, mes, dia, 0, 0, 0, 0)
+
+            console.log(dataFinal)
 
             const dataDuplicada = await DataAgend.findOne({ data: dataFinal })
 
@@ -65,6 +67,7 @@ export default class DataController {
 
         }
         catch (error) {
+            console.log(error)
             res.status(500).json({ error: 'Erro interno do servidor' })
         }
     }
