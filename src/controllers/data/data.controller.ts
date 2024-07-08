@@ -48,12 +48,10 @@ export default class DataController {
 
             const dataDuplicada = await DataAgend.findOne({ data: dataFinal })
 
-            const idHemocentro = hemocentro._id.toString()
-
             if (!dataDuplicada) {
                 const dataAgend = new DataAgend()
                 dataAgend.data = dataFinal
-                dataAgend.hemocentroId = new mongoose.Types.ObjectId(idHemocentro)
+                dataAgend.hemocentroId = user.hemocentroId
 
                 await dataAgend.save()
 
