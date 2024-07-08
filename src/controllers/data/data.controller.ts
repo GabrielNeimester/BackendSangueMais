@@ -46,8 +46,6 @@ export default class DataController {
 
             const dataFinal = new Date(ano, mes, dia, 0, 0, 0, 0)
 
-            console.log(dataFinal)
-
             const dataDuplicada = await DataAgend.findOne({ data: dataFinal })
 
             if (!dataDuplicada) {
