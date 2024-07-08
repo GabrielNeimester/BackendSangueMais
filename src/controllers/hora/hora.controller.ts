@@ -2,19 +2,24 @@ import { Request, Response } from 'express'
 import User from '../../models/user.model'
 import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
+import Hora from '../../models/hora.model'
 import DataAgend from '../../models/data.model'
 
-export default class DataController {
+export default class HoraController {
     static async store(req: Request, res: Response) {
-        const { data } = req.body
+        const { horario, dataId } = req.body
         const { userId } = req.headers
 
         if (!userId) {
             return res.status(401).json({ error: 'Usuário não autenticado' })
         }
 
-        if (!data) {
+        if (!horario) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(dataId)) {
+            return res.status(400).json({ error: 'Id de data inválido' })
         }
 
         const user = await User.findOne({ _id: userId })
@@ -27,38 +32,32 @@ export default class DataController {
             return res.status(404).json({ error: 'Hemocentro não encontrado' })
         }
 
+        const data = await DataAgend.findById(dataId)
+        if (!data || data.hemocentroId.toString() !== user.hemocentroId.toString()) {
+            return res.status(404).json({ error: 'Data não associada ao Hemocentro' })
+        }
+
+
         try {
-            const regexData = /^\d{4}-\d{2}-\d{2}$/
+            const horaRegex = /^(?:[01]\d|2[0-3]):(?:[0-5]\d)$/
 
-            if (!regexData.test(data)) {
-                return res.status(400).json({ mensagem: 'Formato de data inválido. Use o formato YYYY-MM-DD.' })
+            if (!horaRegex.test(horario)) {
+                return res.status(400).json({ mensagem: 'Formato de hora inválido. Use o formato HH:MM.' })
             }
 
-            const partesData = data.split('-');
-            const ano = parseInt(partesData[0], 10)
-            const mes = parseInt(partesData[1], 10) - 1
-            const dia = parseInt(partesData[2], 10)
-            const dataConvertida = new Date(ano, mes, dia)
+            const horaDuplicada = await Hora.findOne({ horario: horario })
 
-            if (dataConvertida.getFullYear() !== ano || dataConvertida.getMonth() !== mes || dataConvertida.getDate() !== dia) {
-                return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' })
-            }
+            if (!horaDuplicada) {
+                const hora = new Hora()
+                hora.horario = horario
+                hora.dataId = dataId
 
-            const dataFinal = new Date(ano, mes, dia, 0, 0, 0, 0)
+                await hora.save()
 
-            const dataDuplicada = await DataAgend.findOne({ data: dataFinal })
-
-            if (!dataDuplicada) {
-                const dataAgend = new DataAgend()
-                dataAgend.data = dataFinal
-                dataAgend.hemocentroId = user.hemocentroId
-
-                await dataAgend.save()
-
-                res.status(201).json(dataAgend)
+                res.status(201).json(hora)
             }
             else {
-                return res.status(400).json({ mensagem: 'data já cadastrada' })
+                return res.status(400).json({ mensagem: 'Horário já cadastrado' })
             }
 
 
@@ -70,10 +69,10 @@ export default class DataController {
     }
 
     static async index(req: Request, res: Response) {
-        const { hemocentroId } = req.params
+        const { dataId } = req.params
 
-        const dataAgend = await DataAgend.find({ hemocentroId: hemocentroId })
-        res.status(200).json(dataAgend)
+        const hora = await Hora.find({ dataId: dataId })
+        res.status(200).json(hora)
     }
 
     static async show(req: Request, res: Response) {
@@ -83,8 +82,8 @@ export default class DataController {
             return res.status(400).json({ error: 'O id é obrigatório' })
         }
 
-        const dataAgend = await DataAgend.findById(id).exec()
-        return res.json(dataAgend)
+        const hora = await Hora.findById(id).exec()
+        return res.json(hora)
     }
 
     static async delete(req: Request, res: Response) {
@@ -95,10 +94,10 @@ export default class DataController {
             return res.status(400).json({ error: 'O id é obrigatório' })
         }
 
-        const dataAgend = await DataAgend.findById(id)
+        const hora = await Hora.findById(id)
 
-        if (!dataAgend) {
-            return res.status(404).json({ error: 'Data não encontrada' })
+        if (!hora) {
+            return res.status(404).json({ error: 'Horario não encontrado' })
         }
 
         const user = await User.findOne({ _id: userId })
@@ -107,8 +106,12 @@ export default class DataController {
             return res.status(404).json({ error: 'Usuário não encontrado' })
         }
 
-        if (dataAgend.hemocentroId.toString() === user.hemocentroId.toString()) {
-            await dataAgend.deleteOne({ _id: id })
+        const data = await DataAgend.findById(hora.dataId)
+        if (!data || data.hemocentroId.toString() !== user.hemocentroId.toString()) {
+            return res.status(404).json({ error: 'Data não associada ao Hemocentro' })
+        }
+        else if (data.hemocentroId.toString() === user.hemocentroId.toString()) {
+            await Hora.deleteOne({ _id: id })
             return res.status(204).json()
 
         }
