@@ -45,7 +45,7 @@ export default class HoraController {
                 return res.status(400).json({ mensagem: 'Formato de hora inválido. Use o formato HH:MM.' })
             }
 
-            const horaDuplicada = await Hora.findOne({ horario: horario })
+            const horaDuplicada = await Hora.findOne({ horario: horario, dataId: dataId })
 
             if (!horaDuplicada) {
                 const hora = new Hora()

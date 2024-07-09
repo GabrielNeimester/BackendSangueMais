@@ -6,6 +6,7 @@ import questoesRoutes from './questoes/questoes.routes'
 import opcoesRoutes from './opcoes/opcoes.routes'
 import dataRoutes from './data/data.routes'
 import horaRoutes from './hora/hora.routes'
+import agendamentoRoutes from './agendamento/agendamento.routes'
 
 
 const routes = Router()
@@ -17,6 +18,7 @@ routes.use('/questoes', questoesRoutes)
 routes.use('/opcoes', opcoesRoutes)
 routes.use('/data', dataRoutes)
 routes.use('/hora', horaRoutes)
+routes.use('/agendamento', agendamentoRoutes)
 
 
 export default routes

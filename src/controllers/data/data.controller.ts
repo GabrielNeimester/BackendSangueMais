@@ -44,13 +44,11 @@ export default class DataController {
                 return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' })
             }
 
-            const dataFinal = new Date(ano, mes, dia, 0, 0, 0, 0)
-
-            const dataDuplicada = await DataAgend.findOne({ data: dataFinal })
+            const dataDuplicada = await DataAgend.findOne({ data: data })
 
             if (!dataDuplicada) {
                 const dataAgend = new DataAgend()
-                dataAgend.data = dataFinal
+                dataAgend.data = data
                 dataAgend.hemocentroId = user.hemocentroId
 
                 await dataAgend.save()
