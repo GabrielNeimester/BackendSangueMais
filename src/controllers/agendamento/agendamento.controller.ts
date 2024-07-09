@@ -114,6 +114,7 @@ export default class AgendamentoController {
                 const mailOptions = {
                     from: 'TesteSangueMais@outlook.com',
                     to: email,
+                    cc: 'barbara.bruzon@fatec.sp.gov.br',
                     subject: 'Assunto do e-mail',
                     text: `<h1>Agendamento feito com sucesso</h1>
                   <p>Seu agendamento foi registrado com sucesso!</p>
