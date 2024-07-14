@@ -47,8 +47,29 @@ export default class QuestoesController {
     static async index(req: Request, res: Response) {
         const { hemocentroId } = req.params
 
+        if (!hemocentroId || !mongoose.Types.ObjectId.isValid(hemocentroId)) {
+            return res.status(400).json({ error: 'O id é obrigatório' })
+        }
+
         const questoes = await Questoes.find({ hemocentroId: hemocentroId })
         return res.json(questoes)
+    }
+
+    static async indexByUser(req: Request, res: Response) {
+        const { userId } = req.headers
+
+        const user = await User.findOne({ _id: userId })
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' })
+        }
+
+        const hemocentro = await Hemocentro.findById(user.hemocentroId)
+        if (!hemocentro) {
+            return res.status(404).json({ error: 'Hemocentro não encontrado' })
+        }
+
+        const questao = await Questoes.find({ hemocentroId: user.hemocentroId })
+        res.status(200).json(questao)
     }
 
     static async show(req: Request, res: Response) {

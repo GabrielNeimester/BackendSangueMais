@@ -5,7 +5,8 @@ import DataController from '../../controllers/data/data.controller'
 const dataRoutes = Router()
 
 dataRoutes.post('/', authMiddleware, DataController.store)
-dataRoutes.get('/:hemocentroId', authMiddleware, DataController.index)
+dataRoutes.get('/showByHemocentro/:hemocentroId', DataController.index)
+dataRoutes.get('/showByUser', authMiddleware, DataController.indexByUser)
 dataRoutes.delete('/:id', authMiddleware, DataController.delete)
 dataRoutes.get('/byId/:id', authMiddleware, DataController.show)
 

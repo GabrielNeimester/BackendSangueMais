@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface DataAgendDocument extends Document {
-    data: Date
+    data: string
     hemocentroId: mongoose.Types.ObjectId
 }
 
