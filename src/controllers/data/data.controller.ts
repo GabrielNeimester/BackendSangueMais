@@ -3,6 +3,7 @@ import User from '../../models/user.model'
 import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
 import DataAgend from '../../models/data.model'
+import Hora from '../../models/hora.model'
 
 export default class DataController {
     static async store(req: Request, res: Response) {
@@ -128,6 +129,7 @@ export default class DataController {
 
         if (dataAgend.hemocentroId.toString() === user.hemocentroId.toString()) {
             await dataAgend.deleteOne({ _id: id })
+            await Hora.deleteMany({dataId: id})
             return res.status(204).json()
 
         }

@@ -71,6 +71,10 @@ export default class HoraController {
     static async index(req: Request, res: Response) {
         const { dataId } = req.params
 
+        if (!dataId || !mongoose.Types.ObjectId.isValid(dataId)) {
+            return res.status(400).json({ error: 'O id é obrigatório' })
+        }
+
         const hora = await Hora.find({ dataId: dataId })
         res.status(200).json(hora)
     }
