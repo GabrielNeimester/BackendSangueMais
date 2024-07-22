@@ -127,11 +127,10 @@ export default class QuestoesController {
 
             if (questao.hemocentroId.toString() === user.hemocentroId.toString()) {
                 questao.descricao = descricao
-                return res.status(201).json({ questao })
+                await questao.save()
+                return res.status(201).json(questao)
             }
 
-            console.log('questao:', questao);
-            console.log('user:', user);
 
             return res.status(401).json({ error: 'Acesso não autorizado' })
 
