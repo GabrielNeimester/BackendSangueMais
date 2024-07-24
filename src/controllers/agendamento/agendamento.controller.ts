@@ -201,7 +201,7 @@ export default class AgendamentoController {
             }
 
             if (agendamento.hemocentroId.toString() === user.hemocentroId.toString()) {
-                return res.status(201).json({ agendamento })
+                return res.status(201).json(agendamento)
             }
         }
         catch (error) {
