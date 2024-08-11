@@ -45,6 +45,15 @@ export default class DataController {
                 return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' })
             }
 
+            const dataAtual = new Date()
+
+            dataAtual.setHours(0, 0, 0, 0)
+            dataConvertida.setHours(0, 0, 0, 0)
+    
+            if (dataConvertida <= dataAtual) {
+                return res.status(400).json({ mensagem: 'Não é permitido cadastrar data anterior ao dia atual' })
+            }
+
             const dataDuplicada = await DataAgend.findOne({ data: data })
 
             if (!dataDuplicada) {
@@ -57,7 +66,7 @@ export default class DataController {
                 res.status(201).json(dataAgend)
             }
             else {
-                return res.status(400).json({ mensagem: 'data já cadastrada' })
+                return res.status(400).json({ mensagem: 'Data já cadastrada!' })
             }
 
 
@@ -75,7 +84,7 @@ export default class DataController {
             return res.status(400).json({ error: 'O id é obrigatório' })
         }
 
-        const dataAgend = await DataAgend.find({ hemocentroId: hemocentroId })
+        const dataAgend = await DataAgend.find({ hemocentroId: hemocentroId }).sort({ data: 1 })
         res.status(200).json(dataAgend)
     }
 
@@ -92,7 +101,7 @@ export default class DataController {
             return res.status(404).json({ error: 'Hemocentro não encontrado' })
         }
 
-        const dataAgend = await DataAgend.find({ hemocentroId: user.hemocentroId })
+        const dataAgend = await DataAgend.find({ hemocentroId: user.hemocentroId }).sort({ data: 1 })
         res.status(200).json(dataAgend)
     }
 
