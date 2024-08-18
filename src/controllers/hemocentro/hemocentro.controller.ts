@@ -6,13 +6,13 @@ import { ObjectId } from 'mongodb'
 
 export default class HemocentroController {
     static async store(req: Request, res: Response) {
-        const { cnpj, nome, estado, cidade, bairro, telefone, email } = req.body
+        const { cnpj, nome, estado, cidade, bairro, telefone, email, numero, endereco } = req.body
         const { userId } = req.headers
 
 
         if (!userId) return res.status(401).json({ error: 'Usuário não autenticado' })
 
-        if (!cnpj || !nome || !estado || !cidade || !bairro || !telefone || !email) {
+        if (!cnpj || !nome || !estado || !cidade || !bairro || !telefone || !email || !numero || !endereco) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
         }
 
@@ -36,6 +36,8 @@ export default class HemocentroController {
                 hemocentro.bairro = bairro
                 hemocentro.email = email
                 hemocentro.ativo = true
+                hemocentro.endereco = endereco
+                hemocentro.numero = numero
                 await hemocentro.save()
 
                 return res.status(201).json({ hemocentro })
@@ -90,14 +92,14 @@ export default class HemocentroController {
 
     static async update(req: Request, res: Response) {
         const { id } = req.params
-        const { cnpj, nome, estado, cidade, bairro, telefone, email, ativo } = req.body
+        const { cnpj, nome, estado, cidade, bairro, telefone, email, ativo, endereco, numero } = req.body
 
         const { userId } = req.headers
 
 
         if (!userId) return res.status(401).json({ error: 'Usuário não autenticado' })
 
-        if (!cnpj || !nome || !estado || !cidade || !bairro || !telefone || !email) {
+        if (!cnpj || !nome || !estado || !cidade || !bairro || !telefone || !email || !endereco || !numero) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
         }
 
@@ -140,6 +142,8 @@ export default class HemocentroController {
                 hemocentro.bairro = bairro
                 hemocentro.email = email
                 hemocentro.ativo = ativo
+                hemocentro.endereco = endereco
+                hemocentro.numero = numero
                 await hemocentro.save()
 
                 return res.status(201).json({ hemocentro })
@@ -159,6 +163,8 @@ export default class HemocentroController {
                         hemocentro.telefone = telefone
                         hemocentro.bairro = bairro
                         hemocentro.email = email
+                        hemocentro.endereco = endereco
+                        hemocentro.numero = numero
                         await hemocentro.save()
 
                         return res.status(201).json({ hemocentro })

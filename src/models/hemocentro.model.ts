@@ -6,6 +6,8 @@ export interface HemocentroDocument extends Document {
   estado: string
   cidade: string
   bairro: string
+  endereco: string
+  numero:string
   telefone: string
   email: string
   ativo: boolean
@@ -35,6 +37,16 @@ const HemocentroSchema: Schema = new Schema({
     type: String,
     required: true,
     maxLength: 100
+  },
+  endereco: {
+    type: String,
+    required: true,
+    maxLength: 200
+  },
+  numero: {
+    type: String,
+    required: true,
+    maxLength: 10
   },
   bairro: {
     type: String,

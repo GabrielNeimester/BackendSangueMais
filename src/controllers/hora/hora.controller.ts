@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
 import Hora from '../../models/hora.model'
 import DataAgend from '../../models/data.model'
+import { error } from 'console'
 
 export default class HoraController {
     static async store(req: Request, res: Response) {
@@ -48,6 +49,20 @@ export default class HoraController {
             const horaDuplicada = await Hora.findOne({ horario: horario, dataId: dataId })
 
             if (!horaDuplicada) {
+                const [hours, minutes] = horario.split(':').map(Number);
+                const horarioEmMinutos = hours * 60 + minutes;
+    
+                const horariosExistentes = await Hora.find({ dataId: dataId });
+    
+                for (let horaExistente of horariosExistentes) {
+                    const [hExistente, mExistente] = horaExistente.horario.split(':').map(Number)
+                    const horarioExistenteEmMinutos = hExistente * 60 + mExistente
+    
+                    if (Math.abs(horarioExistenteEmMinutos - horarioEmMinutos) < 15) {
+                        return res.status(400).json({ error: 'Já existe horário cadastrado em um intervalo próximo menor que 15 minutos!' })
+                    }
+                }
+
                 const hora = new Hora()
                 hora.horario = horario
                 hora.dataId = dataId
@@ -75,8 +90,12 @@ export default class HoraController {
             return res.status(400).json({ error: 'O id é obrigatório' })
         }
 
-        const hora = await Hora.find({ dataId: dataId })
-        res.status(200).json(hora)
+        try {
+            const hora = await Hora.find({ dataId: dataId }).sort({ horario: 1 })
+            res.status(200).json(hora)
+        } catch (error) {
+            res.status(500).json({ error: 'Erro interno do servidor' })
+        }
     }
 
     static async show(req: Request, res: Response) {
@@ -119,7 +138,7 @@ export default class HoraController {
             return res.status(204).json()
 
         }
-        else{
+        else {
             return res.status(401).json({ error: 'Acesso nâo autorizado' })
         }
     }
