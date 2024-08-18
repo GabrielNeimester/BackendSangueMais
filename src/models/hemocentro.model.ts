@@ -19,7 +19,7 @@ const HemocentroSchema: Schema = new Schema({
   cnpj: {
     type: String,
     required: true,
-    maxLength: 14
+    maxLength: 18
   },
   nome: {
     type: String,
@@ -44,7 +44,7 @@ const HemocentroSchema: Schema = new Schema({
   telefone: {
     type: String,
     required: true,
-    maxLength: 10
+    maxLength: 15
   },
   email: {
     type: String,

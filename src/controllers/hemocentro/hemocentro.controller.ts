@@ -107,6 +107,17 @@ export default class HemocentroController {
 
         try {
 
+            const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!regexEmail.test(email)) {
+                return res.status(400).json({ mensagem: 'E-mail inválido' })
+            }
+    
+            const regexTelefone = /^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/
+            if (!regexTelefone.test(telefone)) {
+                return res.status(400).json({ mensagem: 'Formato de telefone inválido. É necessário informar um telefone em dos formatos válidos "(xx) xxxx-xxxx, (xx) xxxxx-xxxx"' })
+            }
+    
+
             const user = await User.findById(userId)
 
             if (!user) {
