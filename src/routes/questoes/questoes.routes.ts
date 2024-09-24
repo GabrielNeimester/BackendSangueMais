@@ -11,5 +11,6 @@ questoesRoutes.post('/', authMiddleware, QuestoesController.store)
 questoesRoutes.put('/:id', authMiddleware, QuestoesController.update)
 questoesRoutes.get('/:id', QuestoesController.show)
 questoesRoutes.delete('/:id', authMiddleware, QuestoesController.delete)
+questoesRoutes.get('/getForm/:hemocentroId', QuestoesController.getQuestoesWithOpcoes)
 
 export default questoesRoutes

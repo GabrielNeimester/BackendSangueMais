@@ -170,5 +170,51 @@ export default class QuestoesController {
         }
     }
 
+    static async getQuestoesWithOpcoes(req: Request, res: Response) {
+        const { hemocentroId } = req.params
+        const { page , limit } = req.body 
+        
+        if (!hemocentroId || !mongoose.Types.ObjectId.isValid(hemocentroId)) {
+          return res.status(400).json({ error: 'Hemocentro ID inválido' })
+        }
+    
+        try {
+
+          const questoes = await Questoes.find({ hemocentroId }).lean()
+
+          const questoesComOpcoes = await Promise.all(
+            questoes.map(async (questao) => {
+              const opcoes = await Opcoes.find({ questaoId: questao._id }).lean()
+              
+              if (opcoes.length > 0) {
+                return {
+                  id: questao._id,
+                  descricao: questao.descricao,
+                  opcoes: opcoes.map(opcao => ({
+                    id: opcao._id,
+                    descricao: opcao.descricao,
+                  })),
+                }
+              }
+              return null
+            })
+          )
+
+          const questoesFiltradas = questoesComOpcoes.filter(questao => questao !== null)
+    
+          const totalQuestoesComOpcoes = questoesFiltradas.length
+    
+          const questoesPaginadas = questoesFiltradas.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit))
+    
+          return res.status(200).json({
+            page: Number(page),
+            limit: Number(limit),
+            totalQuestoesComOpcoes, 
+            questoes: questoesPaginadas, 
+          })
+        } catch (error) {
+          return res.status(500).json({ error: 'Erro interno do servidor' })
+        }
+      }
 }
 
