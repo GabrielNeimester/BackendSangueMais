@@ -172,7 +172,8 @@ export default class QuestoesController {
 
     static async getQuestoesWithOpcoes(req: Request, res: Response) {
         const { hemocentroId } = req.params
-        const { page , limit } = req.query
+        const { page} = req.query
+        const limit = 1
         
         if (!hemocentroId || !mongoose.Types.ObjectId.isValid(hemocentroId)) {
           return res.status(400).json({ error: 'Hemocentro ID inválido' })
@@ -204,13 +205,13 @@ export default class QuestoesController {
     
           const totalQuestoesComOpcoes = questoesFiltradas.length
     
-          const questoesPaginadas = questoesFiltradas.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit))
+          const questaoPaginada = questoesFiltradas.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit))[0];
     
           return res.status(200).json({
             page: Number(page),
             limit: Number(limit),
             totalQuestoesComOpcoes, 
-            questoes: questoesPaginadas, 
+            ...questaoPaginada, 
           })
         } catch (error) {
           return res.status(500).json({ error: 'Erro interno do servidor' })
