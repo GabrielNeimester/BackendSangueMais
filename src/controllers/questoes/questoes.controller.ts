@@ -172,7 +172,7 @@ export default class QuestoesController {
 
     static async getQuestoesWithOpcoes(req: Request, res: Response) {
         const { hemocentroId } = req.params
-        const { page} = req.query
+        const {page} = req.query
         const limit = 1
         
         if (!hemocentroId || !mongoose.Types.ObjectId.isValid(hemocentroId)) {

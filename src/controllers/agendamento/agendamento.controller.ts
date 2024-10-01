@@ -3,152 +3,119 @@ import User from '../../models/user.model'
 import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
 import Agendamento from '../../models/agendamento.model'
-import nodemailer from 'nodemailer'
+import Hora from '../../models/hora.model'
+import Questoes from '../../models/questoes.model'
+import Opcoes from '../../models/opcoes.model'
+import DataAgendModel from '../../models/data.model'
 
-const emailTeste = process.env.EMAIL
-const senhaTeste = process.env.PASSEMAIL
-
-const transporter = nodemailer.createTransport({
-    service: "hotmail",
-    auth: {
-        user: emailTeste,
-        pass: senhaTeste
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-})
 
 export default class AgendamentoController {
     static async store(req: Request, res: Response) {
-        const { hemocentroId, nomeCompleto, dataNascimento, dataAgendamento, horario, statusDoacao, impedimento, diasImpedidos, email } = req.body
+        const { cpf, dataAgendamento, dataNascimento, email, hemocentroId, horario, nomeCompleto, sexo, telefone, tipoSanguineo, selectedAnswers } = req.body
 
-        if (!mongoose.Types.ObjectId.isValid(hemocentroId)) {
-            return res.status(400).json({ error: 'Id de hemocentro inválido' })
-        }
 
-        if (!nomeCompleto || !dataAgendamento || !horario || !statusDoacao || !impedimento || !email) {
+        // Validação de campos obrigatórios
+        if (!cpf || !dataAgendamento || !dataNascimento || !email || !hemocentroId || !horario || !nomeCompleto || !sexo || !telefone || !tipoSanguineo) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
         }
 
         try {
-
             const hemocentro = await Hemocentro.findById(hemocentroId)
             if (!hemocentro) {
                 return res.status(404).json({ error: 'Hemocentro não encontrado' })
             }
 
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
             if (!emailRegex.test(email)) {
                 return res.status(400).json({ mensagem: 'Formato de e-mail inválido' })
             }
 
-            const horaRegex = /^(?:[01]\d|2[0-3]):(?:[0-5]\d)$/
-
-            if (!horaRegex.test(horario)) {
-                return res.status(400).json({ mensagem: 'Formato de hora inválido. Use o formato HH:MM.' })
+            const dataDoacao = await DataAgendModel.findById(dataAgendamento)
+            if (!dataDoacao) {
+                return res.status(404).json({ error: 'Data não encontrada' })
             }
+
+            const horarioAgendamento = await Hora.findById(horario)
+            if (!horarioAgendamento) {
+                return res.status(404).json({ error: 'Horário não encontrado' })
+            }
+
+            let impedimentoDefinitivo = false;
+            let impedimentoTemporario = false;
+            let diasImpedidos = 0;
+
+            if (selectedAnswers) {
+                for (const [questionId, opcaoId] of Object.entries(selectedAnswers)) {
+                    if (
+                        !mongoose.Types.ObjectId.isValid(questionId as string) ||
+                        !mongoose.Types.ObjectId.isValid(opcaoId as string)
+                    ) {
+                        return res.status(400).json({ error: 'ID de pergunta ou resposta inválido no selectedAnswers' });
+                    }
+                }
+
+                const questoesPromessas = Object.entries(selectedAnswers).map(async ([questionId, opcaoId]) => {
+                    const questao = await Questoes.findById(questionId as string);
+                    const resposta = await Opcoes.findById(opcaoId as string);
+                    if (!questao) throw new Error(`Questão com ID ${questionId} não encontrada`);
+                    if (!resposta) throw new Error(`Resposta com ID ${opcaoId} não encontrada`);
+                    return { questao, resposta };
+                });
+
+                const questoesRespostas = await Promise.all(questoesPromessas);
+
+            }
+
+
 
             const regexData = /^\d{4}-\d{2}-\d{2}$/
-
-            if (!regexData.test(dataAgendamento)) {
-                return res.status(400).json({ mensagem: 'Formato de data inválido. Use o formato YYYY-MM-DD.' })
-            }
-
-            const partesDataAgendamento = dataAgendamento.split('-');
-            const anoAgendamento = parseInt(partesDataAgendamento[0], 10)
-            const mesAgendamento = parseInt(partesDataAgendamento[1], 10) - 1
-            const diaAgendamento = parseInt(partesDataAgendamento[2], 10)
-            const dataAgendamentoConvertida = new Date(anoAgendamento, mesAgendamento, diaAgendamento)
-
-            if (dataAgendamentoConvertida.getFullYear() !== anoAgendamento || dataAgendamentoConvertida.getMonth() !== mesAgendamento || dataAgendamentoConvertida.getDate() !== diaAgendamento) {
-                return res.status(400).json({ mensagem: 'Data de Agendamento inválida. Verifique o ano, mês e dia.' })
-            }
-
             if (!regexData.test(dataNascimento)) {
                 return res.status(400).json({ mensagem: 'Formato de data inválido. Use o formato YYYY-MM-DD.' })
             }
 
             const partesDataNascimento = dataNascimento.split('-');
-            const anoNascimento = parseInt(partesDataNascimento[0], 10)
-            const mesNascimento = parseInt(partesDataNascimento[1], 10) - 1
-            const diaNascimento = parseInt(partesDataNascimento[2], 10)
-            const dataNascimentoConvertida = new Date(anoNascimento, mesNascimento, diaNascimento)
+            const anoNascimento = parseInt(partesDataNascimento[0], 10);
+            const mesNascimento = parseInt(partesDataNascimento[1], 10) - 1;
+            const diaNascimento = parseInt(partesDataNascimento[2], 10);
+            const dataNascimentoConvertida = new Date(anoNascimento, mesNascimento, diaNascimento);
 
             if (dataNascimentoConvertida.getFullYear() !== anoNascimento || dataNascimentoConvertida.getMonth() !== mesNascimento || dataNascimentoConvertida.getDate() !== diaNascimento) {
-                return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' })
+                return res.status(400).json({ mensagem: 'Data inválida. Verifique o ano, mês e dia.' });
             }
 
+            // Criação do agendamento
+            const agendamento = new Agendamento();
+            agendamento.hemocentroId = hemocentroId;
+            agendamento.nomeCompleto = nomeCompleto;
+            agendamento.dataAgendamento = dataDoacao.data;
+            agendamento.dataNascimento = dataNascimento;
+            agendamento.horario = horarioAgendamento.horario;
+            agendamento.email = email;
 
-            const agendamento = new Agendamento()
-            agendamento.hemocentroId = hemocentroId
-            agendamento.nomeCompleto = nomeCompleto
-            agendamento.dataAgendamento = dataAgendamento
-            agendamento.dataNascimento = dataNascimento
-            agendamento.horario = horario
-            agendamento.statusDoacao = statusDoacao
-            agendamento.impedimento = impedimento
-            agendamento.email = email
-
-            if (impedimento === 'temporario' && diasImpedidos) {
-                if (isNaN(diasImpedidos)) {
-                    return res.status(400).json({ error: 'Os dias de impedimento devem ser um número válido' });
-                }
-                agendamento.diasImpedidos = diasImpedidos
-            }
-            else {
-                agendamento.diasImpedidos = 0
+            if (impedimentoTemporario && !impedimentoDefinitivo) {
+                agendamento.impedimento = 'temporario';
+                agendamento.diasImpedidos = diasImpedidos;
+                agendamento.statusDoacao = 'bloqueado';
+                await agendamento.save();
+                return res.status(200).send(agendamento);
             }
 
-            if (impedimento === "nenhum") {
-                agendamento.statusDoacao = 'liberado'
-            }
-            else {
-                agendamento.statusDoacao = 'bloqueado'
+            if (impedimentoDefinitivo) {
+                agendamento.impedimento = 'definitivo';
+                agendamento.statusDoacao = 'bloqueado';
+                agendamento.diasImpedidos = 0;
+                await agendamento.save();
+                return res.status(200).send(agendamento);
             }
 
-            await agendamento.save()
-
-            try {
-                const mailOptions = {
-                    from: 'TesteSangueMais@outlook.com',
-                    to: email,
-                    cc: 'barbara.bruzon@fatec.sp.gov.br',
-                    subject: 'Agendamento Sangue+',
-                    html: `<h1>Agendamento feito com sucesso</h1>
-                  <p>Seu agendamento foi registrado com sucesso!</p>
-                  <table>
-                        <tr>
-                            <td>Nome Completo</td>
-                            <td>Data de agendamento</td>
-                            <td>Data de nascimento</td>
-                            <td>Horário</td>
-                            <td>Status Doação</td>
-                            <td>Impedimento</td>
-                        </tr>
-                        <tr>
-                            <td>${nomeCompleto}</td>
-                            <td>${dataAgendamento}</td>
-                            <td>${dataNascimento}</td>
-                            <td>${horario}</td>
-                            <td>${statusDoacao}</td>
-                            <td>${impedimento}</td>
-                        </tr>
-                    </table>`,
-                };
-
-                const info = await transporter.sendMail(mailOptions);
-                console.log(`E-mail enviado: ${info.messageId}`);
-                res.status(200).send('E-mail enviado com sucesso!');
-            } catch (error) {
-                console.error(`Erro ao enviar e-mail: ${error}`);
-                res.status(500).send('Erro ao enviar e-mail. Por favor, tente novamente mais tarde.');
-            }
+            agendamento.impedimento = 'nenhum';
+            agendamento.statusDoacao = 'liberado';
+            agendamento.diasImpedidos = 0;
+            await agendamento.save();
+            return res.status(200).send(agendamento);
 
         } catch (error) {
-            console.log(error)
-            return res.status(500).json({ error: 'Erro interno do servidor' })
+            return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
 
@@ -254,7 +221,6 @@ export default class AgendamentoController {
             }
 
         } catch (error) {
-            console.log(error)
             return res.status(500).json({ error: 'Erro interno do servidor' })
         }
     }
