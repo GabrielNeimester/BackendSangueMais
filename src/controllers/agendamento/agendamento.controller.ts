@@ -13,8 +13,6 @@ export default class AgendamentoController {
     static async store(req: Request, res: Response) {
         const { cpf, dataAgendamento, dataNascimento, email, hemocentroId, horario, nomeCompleto, sexo, telefone, tipoSanguineo, selectedAnswers } = req.body
 
-
-        // Validação de campos obrigatórios
         if (!cpf || !dataAgendamento || !dataNascimento || !email || !hemocentroId || !horario || !nomeCompleto || !sexo || !telefone || !tipoSanguineo) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
         }
@@ -63,6 +61,19 @@ export default class AgendamentoController {
                 });
 
                 const questoesRespostas = await Promise.all(questoesPromessas);
+
+                questoesRespostas.forEach(({ questao, resposta }) => {
+            
+                    if (resposta.impedimento === 'definitivo') {
+                        impedimentoDefinitivo = true;
+                    }
+                    if (resposta.impedimento === 'temporario') {
+                        impedimentoTemporario = true;
+                        if (resposta.diasImpedidos > diasImpedidos) {
+                            diasImpedidos = resposta.diasImpedidos;
+                        }
+                    }
+                });
 
             }
 
