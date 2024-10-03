@@ -116,7 +116,7 @@ export default class HemocentroController {
     
             const regexTelefone = /^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/
             if (!regexTelefone.test(telefone)) {
-                return res.status(400).json({ mensagem: 'Formato de telefone inválido. É necessário informar um telefone em dos formatos válidos "(xx) xxxx-xxxx, (xx) xxxxx-xxxx"' })
+                return res.status(400).json({ mensagem: 'Formato de telefone inválido. É necessário informar um telefone em um dos formatos válidos "(xx) xxxx-xxxx, (xx) xxxxx-xxxx"' })
             }
     
 

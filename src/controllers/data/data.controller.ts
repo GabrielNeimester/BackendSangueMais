@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
 import DataAgend from '../../models/data.model'
 import Hora from '../../models/hora.model'
+import Agendamento from '../../models/agendamento.model'
 
 export default class DataController {
     static async store(req: Request, res: Response) {
@@ -54,7 +55,7 @@ export default class DataController {
                 return res.status(400).json({ mensagem: 'Não é permitido cadastrar data anterior ao dia atual' })
             }
 
-            const dataDuplicada = await DataAgend.findOne({ data: data })
+            const dataDuplicada = await DataAgend.findOne({ hemocentroId: user.hemocentroId, data: data})
 
             if (!dataDuplicada) {
                 const dataAgend = new DataAgend()
@@ -73,6 +74,7 @@ export default class DataController {
 
         }
         catch (error) {
+            console.log(error)
             res.status(500).json({ error: 'Erro interno do servidor' })
         }
     }
@@ -134,6 +136,12 @@ export default class DataController {
 
         if (!user) {
             return res.status(404).json({ error: 'Usuário não encontrado' })
+        }
+
+        const agendamento = await Agendamento.findOne({dataAgendamento: dataAgend.data})
+
+        if(agendamento){
+            return res.status(401).json({ error: 'Essa data possui agendamento cadastrados, por favor cancele todos os agendamentos nesse dia para poder apagar a data!' })
         }
 
         if (dataAgend.hemocentroId.toString() === user.hemocentroId.toString()) {

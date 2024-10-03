@@ -12,7 +12,7 @@ import DataAgendModel from '../../models/data.model'
 export default class AgendamentoController {
     static async store(req: Request, res: Response) {
         const { cpf, dataAgendamento, dataNascimento, email, hemocentroId, horario, nomeCompleto, sexo, telefone, tipoSanguineo, selectedAnswers } = req.body
-
+        //Teste Agendamento
         if (!cpf || !dataAgendamento || !dataNascimento || !email || !hemocentroId || !horario || !nomeCompleto || !sexo || !telefone || !tipoSanguineo) {
             return res.status(400).json({ error: 'Todos os campos são obrigatórios' })
         }

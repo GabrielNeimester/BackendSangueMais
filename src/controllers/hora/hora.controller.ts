@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import Hemocentro from '../../models/hemocentro.model'
 import Hora from '../../models/hora.model'
 import DataAgend from '../../models/data.model'
-import { error } from 'console'
+import Agendamento from '../../models/agendamento.model'
 
 export default class HoraController {
     static async store(req: Request, res: Response) {
@@ -127,6 +127,12 @@ export default class HoraController {
 
         if (!user) {
             return res.status(404).json({ error: 'Usuário não encontrado' })
+        }
+
+        const agendamento = await Agendamento.findOne({horario: hora.horario})
+
+        if(agendamento){
+            return res.status(401).json({ error: 'Esse horário possui agendamento cadastrados, por favor cancele todos os agendamentos nesse horário para poder apagá-lo!' })
         }
 
         const data = await DataAgend.findById(hora.dataId)
