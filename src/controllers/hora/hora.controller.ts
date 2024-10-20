@@ -108,7 +108,9 @@ export default class HoraController {
                 const totalAgendamentos = await Agendamento.countDocuments({ horario: hora.horario })
 
                 horariosDisponiveis.push({
+                    _id: hora._id,
                     horario: hora.horario,
+                    dataId: dataId,
                     quantidade: hora.quantidade - totalAgendamentos,
                 })
 
