@@ -5,7 +5,8 @@ import HoraController from '../../controllers/hora/hora.controller'
 const horaRoutes = Router()
 
 horaRoutes.post('/', authMiddleware, HoraController.store)
-horaRoutes.get('/:dataId', HoraController.index)
+horaRoutes.get('/:dataId', HoraController.indexActives)
+horaRoutes.get('/ListarTodas/:dataId', HoraController.index)
 horaRoutes.delete('/:id', authMiddleware, HoraController.delete)
 horaRoutes.get('/byId/:id', authMiddleware, HoraController.show)
 
