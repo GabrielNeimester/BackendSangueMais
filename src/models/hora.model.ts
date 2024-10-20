@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface HoraDocument extends Document {
   horario: string
   dataId: mongoose.Types.ObjectId
+  quantidade: number
 }
 
 const HoraSchema: Schema = new Schema({
@@ -14,6 +15,10 @@ const HoraSchema: Schema = new Schema({
     type: String,
     required: true,
     maxLength: 5
+  },
+  quantidade: {
+    type: Number,
+    required: true
   },
   dataId: {
     type: mongoose.Types.ObjectId,

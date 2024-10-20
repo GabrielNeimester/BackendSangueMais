@@ -38,6 +38,12 @@ export default class AgendamentoController {
                 return res.status(404).json({ error: 'Horário não encontrado' })
             }
 
+            const agendamentosExistentes = await Agendamento.countDocuments({ horario: horarioAgendamento.horario, dataAgendamento });
+
+            if (agendamentosExistentes >= horarioAgendamento.quantidade) {
+                return res.status(400).json({ error: 'Não há vagas disponíveis para este horário' })
+            }
+
             let impedimentoDefinitivo = false;
             let impedimentoTemporario = false;
             let diasImpedidos = 0;
@@ -63,7 +69,7 @@ export default class AgendamentoController {
                 const questoesRespostas = await Promise.all(questoesPromessas);
 
                 questoesRespostas.forEach(({ questao, resposta }) => {
-            
+
                     if (resposta.impedimento === 'definitivo') {
                         impedimentoDefinitivo = true;
                     }

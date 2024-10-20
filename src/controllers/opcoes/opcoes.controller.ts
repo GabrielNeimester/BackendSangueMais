@@ -61,8 +61,6 @@ export default class OpcoesController {
         }
     }
 
-
-
     static async index(req: Request, res: Response) {
         const { questaoId } = req.params
 
