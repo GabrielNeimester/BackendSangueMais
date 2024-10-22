@@ -110,8 +110,7 @@ export default class HoraController {
                 horariosDisponiveis.push({
                     _id: hora._id,
                     horario: hora.horario,
-                    dataId: dataId,
-                    quantidade: hora.quantidade - totalAgendamentos,
+                    dataId: dataId
                 })
 
             }
