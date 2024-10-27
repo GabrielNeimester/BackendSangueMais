@@ -139,7 +139,9 @@ export default class HoraController {
 
                 if (totalAgendamentos < hora.quantidade) {
                     horariosDisponiveis.push({
+                        _id: hora._id,
                         horario: hora.horario,
+                        dataId: dataId,
                         quantidade: hora.quantidade - totalAgendamentos,
                     })
                 }
